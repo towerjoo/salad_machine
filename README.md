@@ -4,7 +4,7 @@
   * setup virtual env
   * pip install -r requirement.txt
   * python manage.py runserver
-2. RESTful APIs can be accessed via http://127.0.0.1:8000/api/v1/fruit/1/ 
+2. RESTful APIs can be accessed via http://127.0.0.1:8000/api/v1/fruit/?format=json for demo
 
 ## Note
 
