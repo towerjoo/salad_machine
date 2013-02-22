@@ -8,15 +8,12 @@ class UserFruitsManager(models.Manager):
         return spec.get_random_basket(level)
 
     def pick_fruit(self, user, fruit):
-        if not self.has_enough_fruits(user, fruit):
-            return None
         try:
             rec = self.get(user=user, fruit_id=fruit.get("id"))
             rec.qty = rec.qty - fruit.get("qty")
             rec.save()
-            return rec
         except:
-            return None
+            pass
         
 
     def has_enough_fruits(self, user, fruit):
@@ -26,12 +23,6 @@ class UserFruitsManager(models.Manager):
         except:
             return False
         
-    def get_rec(self, user, fruit):
-        try:
-            rec = self.get(user=user, fruit_id=fruit.get("id"))
-            return rec
-        except:
-            return None
 
 class UserFruits(models.Model):
     user = models.ForeignKey(User, related_name="fruit_user")
@@ -41,14 +32,13 @@ class UserFruits(models.Model):
     objects = UserFruitsManager()
 
     def __unicode__(self):
-        return "%s has %s units fruit named %s" % (self.user.username, self.qty, spec.get_fruit_info_from_id(self.fruit_id).get("name"))
+        return "%s has %s units fruit" % (self.user.username, self.qty, spec.get_fruit_info_from_id(self.fruit_id).get("name"))
 
 class UserSaladsManager(models.Manager):
     def new_salad(self, user, basket):
         fruits = pickle.dumps(basket)
         salad = self.model(user=user, fruits=fruits)
         salad.save()
-        return salad
 
     def pick_fruit(self, sid, fruit):
         try:
@@ -64,16 +54,13 @@ class UserSaladsManager(models.Manager):
                 else:
                     pick_fruits = {}
                 pick_fruits.update({
-                    fruit.get("id"): pick_fruits.get("qty", 0) + fruit.get("qty"),
+                    fruit.get("name") : pick_fruits.get("qty", 0) + fruit.get("qty"),
                     })
-                salad.pick_fruits = pickle.dumps(pick_fruits)
+                salad.fruits = pickle.dumps(pick_fruits)
                 salad.save()
-                return salad
-            else:
-                return None
         except:
             # handle exceptions
-            return None
+            pass
 
 class UserSalads(models.Model):
     user = models.ForeignKey(User, related_name="salad_user")
@@ -81,8 +68,6 @@ class UserSalads(models.Model):
     pick_fruits = models.TextField(null=True, blank=True)
     fruits = models.TextField() #a pickled data
     is_done = models.BooleanField(default=False)
-
-    objects = UserSaladsManager()
 
     def __unicode__(self):
         return "%s has a salad named %s" % (self.user.username, self.name if self.name else "N/A")
